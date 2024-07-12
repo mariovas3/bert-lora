@@ -42,6 +42,9 @@ class LitData(LightningDataModule):
         utils.save_to_json(
             self.idx_to_label, metadata.IDX_TO_LABEL_PATH, indent=2
         )
+        utils.save_to_json(
+            self.idx_to_label, metadata.SAVED_MODELS_DIR / "idx_to_label.json"
+        )
         print(f"DATA PREP DONE!")
 
     def __repr__(self):
