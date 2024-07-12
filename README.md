@@ -1,5 +1,21 @@
 # Finetuning BERT using LoRA.
 
+Parameters from Lightning training when lora rank is 8 and I use lora weights on query, value and feedforward matrices of transformer blocks.
+
+```bash
+  | Name             | Type       | Params | Mode 
+--------------------------------------------------------
+0 | sbert            | BertModel  | 23.0 M | eval 
+1 | lora_module_list | ModuleList | 258 K  | train
+2 | mlp              | MLP        | 58.1 K | train
+--------------------------------------------------------
+316 K     Trainable params
+22.7 M    Non-trainable params
+23.0 M    Total params
+```
+
+The trainable parameters are about `1.37%` of total parameters.
+
 ## Training the model:
 * Frist, cd in the root of the repo.
 * Second, run `export PYTHONPATH=.`
