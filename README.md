@@ -1,20 +1,20 @@
 # Finetuning BERT using LoRA.
 
-Parameters from Lightning training when lora rank is 8 and I use lora weights on query, value and feedforward matrices of transformer blocks.
+Parameters from Lightning training when lora rank is 16 and I use lora weights on query, value and feedforward matrices of transformer blocks.
 
 ```bash
-  | Name             | Type       | Params | Mode 
+  | Name             | Type       | Params | Mode
 --------------------------------------------------------
-0 | sbert            | BertModel  | 23.0 M | eval 
-1 | lora_module_list | ModuleList | 258 K  | train
+0 | sbert            | BertModel  | 23.2 M | eval
+1 | lora_module_list | ModuleList | 516 K  | train
 2 | mlp              | MLP        | 58.1 K | train
 --------------------------------------------------------
-316 K     Trainable params
+574 K     Trainable params
 22.7 M    Non-trainable params
-23.0 M    Total params
+23.3 M    Total params
 ```
 
-The trainable parameters are about `1.37%` of total parameters.
+The trainable parameters are about `2.46%` of total parameters.
 
 ## Training the model:
 * Frist, cd in the root of the repo.
@@ -29,8 +29,12 @@ The trainable parameters are about `1.37%` of total parameters.
 * Training command:
 
     ```bash
-    python src/run_experiment.py fit --config fit_config.yaml --trainer.accelerator=gpu --trainer.devices=1 --trainer.max_epochs=12 --trainer.check_val_every_n_epoch=2 --trainer.log_every_n_step=25 --data.num_workers=4 --my_model_checkpoint.every_n_epochs=2 --model.lora_alpha=1
+    python src/run_experiment.py fit --config fit_config.yaml --trainer.accelerator=gpu --trainer.devices=1 --trainer.max_epochs=12 --trainer.check_val_every_n_epoch=2 --trainer.log_every_n_step=25 --data.num_workers=4 --my_model_checkpoint.every_n_epochs=2 --model.lora_alpha=1 --model.lora_rank=16 --model.lr=1e-3
     ```
+
+* After checking various configurations for the rank (8, 16, 32) and alpha parameter of LoRA (0.25, 1, 8), I found that the algorithm is not very sensitive to the rank but is very sensitive to alpha. The configuration with `lora_alpha=1` and `lora_rank=16` seemed to work well - achieving `89.58%` accuracy.
+
+* Each experiment was run for 12 epochs taking 28 minutes per run on a L4 GPU from a Lightning Studio.
 
 ## Local testing with Docker:
 * Build the image from the root of the dir:
