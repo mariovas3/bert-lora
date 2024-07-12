@@ -36,6 +36,14 @@ The trainable parameters are about `2.46%` of total parameters.
 
 * Each experiment was run for 12 epochs taking 28 minutes per run on a L4 GPU from a Lightning Studio.
 
+* The training curves from wandb are given below:
+
+	<img src="./assets/imgs/train-curves.png"/>
+
+* I also got a good GPU utilisation of ~ 96%:
+
+    <img src="./assets/imgs/gpu-utilisation.png"/>
+
 ## Local testing with Docker:
 * Build the image from the root of the dir:
     ```bash
