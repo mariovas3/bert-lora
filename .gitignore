@@ -1,0 +1,11 @@
+lightning_logs
+.lightning_studio
+.idea
+.vscode-server
+.vscode
+.wget-hsts
+.bash_history
+saved_models
+*__pycache__
+data/raw
+data/processed

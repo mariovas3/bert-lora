@@ -1,0 +1,12 @@
+files: '.*\.py'
+repos:
+-   repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+    -   id: black
+        args: ["-l", "79", "-v", "-t", "py311"]
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        args: ["--profile", "black"]
