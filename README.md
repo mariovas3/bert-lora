@@ -26,6 +26,11 @@ The trainable parameters are about `1.37%` of total parameters.
     ```bash
     export TOKENIZERS_PARALLELISM=true
     ```
+* Training command:
+
+    ```bash
+    python src/run_experiment.py fit --config fit_config.yaml --trainer.accelerator=gpu --trainer.devices=1 --trainer.max_epochs=12 --trainer.check_val_every_n_epoch=2 --trainer.log_every_n_step=25 --data.num_workers=4 --my_model_checkpoint.every_n_epochs=2 --model.lora_alpha=1
+    ```
 
 ## Local testing with Docker:
 * Build the image from the root of the dir:
