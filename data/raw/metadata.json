@@ -1,0 +1,16 @@
+{
+  "train": {
+    "features": [
+      "texts",
+      "targets"
+    ],
+    "num_samples": 25000
+  },
+  "test": {
+    "features": [
+      "texts",
+      "targets"
+    ],
+    "num_samples": 25000
+  }
+}

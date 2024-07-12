@@ -7,3 +7,5 @@ lightning_logs
 .bash_history
 saved_models
 *__pycache__
+data/raw
+data/processed
