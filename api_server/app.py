@@ -9,7 +9,7 @@ from src.metadata import metadata
 app = Flask(__name__)
 
 model = load_model_for_inference(
-    metadata.SAVED_MODELS_DIR / "latest.ckpt",
+    metadata.SAVED_MODELS_DIR / "latest-bf16.ckpt",
     metadata.SAVED_MODELS_DIR / "idx_to_label.json",
 )
 model.eval()
