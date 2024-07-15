@@ -13,3 +13,4 @@ typeshed_client==2.5.1
 wandb==0.17.4
 Flask==3.0.3
 datasets==2.20.0
+gradio==4.38.1
