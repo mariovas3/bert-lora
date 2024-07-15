@@ -43,13 +43,18 @@ The trainable parameters are about `2.46%` of total parameters. The model checkp
     * When training in `bf16` experiments with full LoRA (query, value and ffn weight adaptors) experiments took 8 minutes and 38 seconds with validation accuracy `90.12%`.
     * When training in `bf16` with LoRA only on query and value matrices, experiments took 6 minutes and 17 seconds with validation accuracy `88.93%`.
     * When training in `bf16` with no LoRA (only the MLP classifier) experiments took 3m and 34 seconds with validation accuracy `80.72%`.
-* The best performing model used full LoRA training and was trained in `bf16` format. You can see the comparison of the training curves from `wandb` for no-LoRA (green), LoRA only on query and value matrices (brown) and full LoRA on query, value and ffn matrices (baige or salmon, not sure what this colour is). The training curve for full LoRA trained in `fp32` is in cyan colour. The full LoRA achieves the least loss in both `fp32` and `bf16` precision. The GPU utilisation was about `85%` for full LoRA in `bf16`, `95%` for full LoRA in `fp32`, but less on the others holding everything else fixed.
+* The best performing model used full LoRA training and was trained in `bf16` format. You can see the comparison of the training curves from `wandb` for no-LoRA (green), LoRA only on query and value matrices (brown) and full LoRA on query, value and ffn matrices (beige). The training curve for full LoRA trained in `fp32` is in cyan colour. The full LoRA achieves the least training loss in both `fp32` and `bf16` precision. The GPU utilisation was about `85%` for full LoRA in `bf16`, `95%` for full LoRA in `fp32`, but less on the others holding everything else fixed.
 
 * The training curves from wandb are given below:
 
+    <img src="./assets/imgs/train-curves-bf16.png"/>
+
 * The gpu utilisation curves are shown below:
 
+    <img src="./assets/imgs/gpu-utilisation-bf16.png"/>
+
 ## Local testing with Docker:
+* I managed to deploy the model in `bfloat16`. The model checkpoint needs to be saved as `saved_models/latest-bf16.ckpt`.
 * Build the image from the root of the dir:
     ```bash
     docker build -t flask-pytorch-model -f api_server/Dockerfile .
