@@ -53,6 +53,7 @@ model:
   lora_alpha: 1
   lr: 0.001
   do_ffn: true
+  do_lora: true
 data:
   batch_size: 250
   num_workers: 1

@@ -14,9 +14,10 @@ Parameters from Lightning training when lora rank is 16 and I use lora weights o
 23.3 M    Total params
 ```
 
-The trainable parameters are about `2.46%` of total parameters.
+The trainable parameters are about `2.46%` of total parameters. The model checkpoint is of size `3.4 Mb` (LoRA weights, MLP weights and optimiser state). The training is done in `bfloat16`. The equvalent `fp32` checkpoint is `6.7 Mb` large.
 
 ## Training the model:
+* I finetuned the model on the IMDB sentiment analysis dataset - 25000 training examples and 25000 validation examples.
 * Frist, cd in the root of the repo.
 * Second, run `export PYTHONPATH=.`
 * Third, run `wandb login` to login to the wandb with your api key.
@@ -29,22 +30,31 @@ The trainable parameters are about `2.46%` of total parameters.
 * Training command:
 
     ```bash
-    python src/run_experiment.py fit --config fit_config.yaml --trainer.accelerator=gpu --trainer.devices=1 --trainer.max_epochs=12 --trainer.check_val_every_n_epoch=2 --trainer.log_every_n_step=25 --data.num_workers=4 --my_model_checkpoint.every_n_epochs=2 --model.lora_alpha=1 --model.lora_rank=16 --model.lr=1e-3
+    python src/run_experiment.py fit --config fit_config.yaml --trainer.accelerator=gpu --trainer.devices=1 --trainer.max_epochs=12 --trainer.check_val_every_n_epoch=2 --trainer.log_every_n_step=25 --data.num_workers=4 --my_model_checkpoint.every_n_epochs=2 --model.lora_alpha=2 --model.lora_rank=16 --model.lr=3e-4 --model.do_lora=true --trainer.precision=bf16-true
     ```
 
-* After checking various configurations for the rank (8, 16, 32) and alpha parameter of LoRA (0.25, 1, 8), I found that the algorithm is not very sensitive to the rank but is very sensitive to alpha. The configuration with `lora_alpha=1` and `lora_rank=16` seemed to work well - achieving `89.58%` accuracy.
+### Results:
 
-* Each experiment was run for 12 epochs taking 28 minutes per run on a L4 GPU from a Lightning Studio.
+* After checking various configurations for the *rank* `(8, 16, 32)` and *alpha* parameter of LoRA `(0.25, 1, 2, 8)`, I found that the algorithm is not very sensitive to the rank but is very sensitive to alpha. The configuration with `lora_alpha=2` and `lora_rank=16` seemed to work well - achieving `90.12%` accuracy.
+
+* Each experiment was run for 12 epochs with `batch_size=250` on a L4 GPU from a Lightning Studio.
+
+    * When training in `fp32` experiments with full LoRA (query, value and ffn weight adaptors) experiments took about 28 minutes with validation accuracy `89.74%`.
+    * When training in `bf16` experiments with full LoRA (query, value and ffn weight adaptors) experiments took 8 minutes and 38 seconds with validation accuracy `90.12%`.
+    * When training in `bf16` with LoRA only on query and value matrices, experiments took 6 minutes and 17 seconds with validation accuracy `88.93%`.
+    * When training in `bf16` with no LoRA (only the MLP classifier) experiments took 3m and 34 seconds with validation accuracy `80.72%`.
+* The best performing model used full LoRA training and was trained in `bf16` format. You can see the comparison of the training curves from `wandb` for no-LoRA (green), LoRA only on query and value matrices (brown) and full LoRA on query, value and ffn matrices (beige). The training curve for full LoRA trained in `fp32` is in cyan colour. The full LoRA achieves the least training loss in both `fp32` and `bf16` precision. The GPU utilisation was about `85%` for full LoRA in `bf16`, `95%` for full LoRA in `fp32`, but less on the others holding everything else fixed.
 
 * The training curves from wandb are given below:
 
-	<img src="./assets/imgs/train-curves.png"/>
+    <img src="./assets/imgs/train-curves-bf16.png"/>
 
-* I also got a good GPU utilisation of ~ 96%:
+* The gpu utilisation curves are shown below:
 
-    <img src="./assets/imgs/gpu-utilisation.png"/>
+    <img src="./assets/imgs/gpu-utilisation-bf16.png"/>
 
 ## Local testing with Docker:
+* I managed to deploy the model in `bfloat16`. The model checkpoint needs to be saved as `saved_models/latest-bf16.ckpt`.
 * Build the image from the root of the dir:
     ```bash
     docker build -t flask-pytorch-model -f api_server/Dockerfile .

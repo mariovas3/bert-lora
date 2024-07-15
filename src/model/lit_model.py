@@ -20,9 +20,11 @@ class LitModel(LightningModule):
         lora_alpha: float = 1,
         lr: float = 1e-3,
         do_ffn: bool = False,
+        do_lora: bool = True,
     ):
         super().__init__()
         self.save_hyperparameters()
+        self.do_lora = do_lora
         self.lora_rank = lora_rank
         self.lora_alpha = lora_alpha
         self.lr = lr
@@ -42,28 +44,33 @@ class LitModel(LightningModule):
         )
         # stop grads for sbert;
         self.sbert.requires_grad_(False)
-        self.lora_module_list = utils.init_lora_module_list_qv(
-            self.sbert,
-            rank=self.lora_rank,
-            alpha=self.lora_alpha,
-            do_ffn=self.do_ffn,
-        )
-        # inplace make qv and possibly ffn's linear layers
-        # into lora layers;
-        utils.load_lora_layers_qv_(
-            sbert=self.sbert,
-            lora_layers=self.lora_module_list,
-            do_ffn=self.do_ffn,
-        )
+        if self.do_lora:
+            self.lora_module_list = utils.init_lora_module_list_qv(
+                self.sbert,
+                rank=self.lora_rank,
+                alpha=self.lora_alpha,
+                do_ffn=self.do_ffn,
+            )
+            # inplace make qv and possibly ffn's linear layers
+            # into lora layers;
+            utils.load_lora_layers_qv_(
+                sbert=self.sbert,
+                lora_layers=self.lora_module_list,
+                do_ffn=self.do_ffn,
+            )
         self.d_model = self.sbert.pooler.dense.in_features
         self.num_classes = len(idx_to_label)
         self.mlp = utils.MLP(self.d_model, self.num_classes)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(
-            chain(self.lora_module_list.parameters(), self.mlp.parameters()),
-            lr=self.lr,
-        )
+        if self.do_lora:
+            return torch.optim.Adam(
+                chain(
+                    self.lora_module_list.parameters(), self.mlp.parameters()
+                ),
+                lr=self.lr,
+            )
+        return torch.optim.Adam(self.mlp.parameters(), lr=self.lr)
 
     def _get_sentence_embed(self, sbert_output, attention_mask):
         # attention mask is (batch_size, seq_len) and has zeros
@@ -150,10 +157,13 @@ class LitModel(LightningModule):
         return ans
 
     def on_save_checkpoint(self, checkpoint):
-        lora_module_list = utils.extract_lora_layers_qv(
-            sbert=self.sbert, do_ffn=self.do_ffn
-        )
         checkpoint["state_dict"] = dict(
-            lora_module_list=lora_module_list.state_dict(),
             mlp=self.mlp.state_dict(),
         )
+        if self.do_lora:
+            lora_module_list = utils.extract_lora_layers_qv(
+                sbert=self.sbert, do_ffn=self.do_ffn
+            )
+            checkpoint["state_dict"][
+                "lora_module_list"
+            ] = lora_module_list.state_dict()
