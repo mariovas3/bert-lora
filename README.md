@@ -87,3 +87,29 @@ The trainable parameters are about `2.46%` of total parameters. The model checkp
     ```bash
     {"body":"{\"sentiment\": [\"negative\"]}","headers":{"Content-Type":"application/json"},"statusCode":200}
     ```
+
+### Gradio app:
+
+* After `export PYTHOPATH=.` just run:
+
+    ```bash
+    gradio api_server/gradio_app.py
+    ```
+
+    You should get a public link - something that end in `gradio.live` and open that link.
+
+* I tested the app and got the following screenshops:
+
+    <img src="./assets/imgs/gradio_demo.png"/>
+
+    and when I input an empty string:
+
+    <img src="./assets/imgs/gradio-empty-string.png"/>
+
+* You can also get the share link, and serve from inside a Docker container. After you have built the image as described above, just run:
+
+    ```bash
+    docker run -p 5000:5000 --name flask-cont-1 flask-pytorch-model bash -c "gradio app/api_server/gradio_app.py"
+    ```
+
+    and you should get a link ending in `gradio.live` which is a public link that everyone can access.
