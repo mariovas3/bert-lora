@@ -5,10 +5,8 @@ WORKDIR /app
 # copy files of saved_models api_server and src;
 COPY . ./app
 
-# will install the torch-cpu dependencies manually so remove
-# their entries from the requirements file;
-RUN sed -i -E 's/.*torch.*|.*lightning.*//' ./app/requirements.txt && \
-    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
+# remove some dev dependencies.
+RUN sed -i -E 's/.*matplot.*|.*wandb.*|.*lightning.*//' ./app/requirements.txt && \
     pip install -r ./app/requirements.txt
 
 ENV PYTHONPATH ./app
